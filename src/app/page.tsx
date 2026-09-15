@@ -15,6 +15,7 @@ import { heroQuery, siteSettingsQuery } from "@/lib/queries";
 import { resolveSkillIcon } from "@/lib/skill-icons";
 
 const BLUR_FADE_DELAY = 0.04;
+export const revalidate = 60;
 
 export default async function Page() {
   const hero: any = await safeFetch(heroQuery);

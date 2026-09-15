@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-mono",
 });
-
+export const revalidate = 60;
 export const metadata: Metadata = {
   metadataBase: new URL(DATA.url),
   title: {
