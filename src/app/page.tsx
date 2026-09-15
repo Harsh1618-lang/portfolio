@@ -10,10 +10,27 @@ import HackathonsSection from "@/components/section/hackathons-section";
 import ProjectsSection from "@/components/section/projects-section";
 import WorkSection from "@/components/section/work-section";
 import { ArrowUpRight } from "lucide-react";
+import { safeFetch, urlFor } from "@/lib/sanity";
+import { heroQuery, siteSettingsQuery } from "@/lib/queries";
+import { resolveSkillIcon } from "@/lib/skill-icons";
 
 const BLUR_FADE_DELAY = 0.04;
 
-export default function Page() {
+export default async function Page() {
+  const hero: any = await safeFetch(heroQuery);
+  const siteSettings: any = await safeFetch(siteSettingsQuery);
+
+  const name = hero?.title || DATA.name;
+  const firstName = name.split(" ")[0];
+  const description = hero?.subtitle || DATA.description;
+  const avatar = hero?.image ? urlFor(hero.image).width(512).url() : DATA.avatarUrl;
+  const summary = siteSettings?.description || DATA.summary;
+  const education = siteSettings?.education || DATA.education;
+  const skills = (siteSettings?.skills || DATA.skills).map((skill: any) => ({
+    name: skill.name,
+    icon: resolveSkillIcon(skill.icon),
+  }));
+
   return (
     <main className="min-h-dvh flex flex-col gap-14 relative">
       <section id="hero">
@@ -24,17 +41,17 @@ export default function Page() {
                 delay={BLUR_FADE_DELAY}
                 className="text-3xl font-semibold tracking-tighter sm:text-4xl lg:text-5xl"
                 yOffset={8}
-                text={`Hi, I'm ${DATA.name.split(" ")[0]}`}
+                text={`Hi, I'm ${firstName}`}
               />
               <BlurFadeText
                 className="text-muted-foreground max-w-[600px] md:text-lg lg:text-xl"
                 delay={BLUR_FADE_DELAY}
-                text={DATA.description}
+                text={description}
               />
             </div>
             <BlurFade delay={BLUR_FADE_DELAY} className="order-1 md:order-2">
               <Avatar className="size-24 md:size-32 border rounded-full shadow-lg ring-4 ring-muted">
-                <AvatarImage alt={DATA.name} src={DATA.avatarUrl} />
+                <AvatarImage alt={name} src={avatar} />
                 <AvatarFallback>{DATA.initials}</AvatarFallback>
               </Avatar>
             </BlurFade>
@@ -49,7 +66,7 @@ export default function Page() {
           <BlurFade delay={BLUR_FADE_DELAY * 4}>
             <div className="prose max-w-full text-pretty font-sans leading-relaxed text-muted-foreground dark:prose-invert">
               <Markdown>
-                {DATA.summary}
+                {summary}
               </Markdown>
             </div>
           </BlurFade>
@@ -71,7 +88,7 @@ export default function Page() {
             <h2 className="text-xl font-bold">Education</h2>
           </BlurFade>
           <div className="flex flex-col gap-8">
-            {DATA.education.map((education, index) => (
+            {education.map((education: any, index: number) => (
               <BlurFade
                 key={education.school}
                 delay={BLUR_FADE_DELAY * 8 + index * 0.05}
@@ -119,7 +136,7 @@ export default function Page() {
             <h2 className="text-xl font-bold">Skills</h2>
           </BlurFade>
           <div className="flex flex-wrap gap-2">
-            {DATA.skills.map((skill, id) => (
+            {skills.map((skill: { name: string; icon?: any }, id: number) => (
               <BlurFade key={skill.name} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
                 <div className="border bg-background border-border ring-2 ring-border/20 rounded-xl h-8 w-fit px-4 flex items-center gap-2">
                   {skill.icon && <skill.icon className="size-4 rounded overflow-hidden object-contain" />}

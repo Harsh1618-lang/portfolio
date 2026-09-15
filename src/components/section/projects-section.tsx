@@ -1,10 +1,13 @@
 import BlurFade from "@/components/magicui/blur-fade";
 import { ProjectCard } from "@/components/project-card";
-import { DATA } from "@/data/resume";
+import { safeFetch, urlFor } from "@/lib/sanity";
+import { projectsQuery } from "@/lib/queries";
 
 const BLUR_FADE_DELAY = 0.04;
 
-export default function ProjectsSection() {
+export default async function ProjectsSection() {
+    const projects: any[] = (await safeFetch<any[]>(projectsQuery)) || [];
+
     return (
         <section id="projects">
             <div className="flex min-h-0 flex-col gap-y-8">
@@ -32,22 +35,21 @@ export default function ProjectsSection() {
                     </div>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-[800px] mx-auto auto-rows-fr">
-                    {DATA.projects.map((project, id) => (
+                    {projects.map((project, id) => (
                         <BlurFade
-                            key={project.title}
+                            key={project.title + id}
                             delay={BLUR_FADE_DELAY * 12 + id * 0.05}
                             className="h-full"
                         >
                             <ProjectCard
-                                href={project.href}
-                                key={project.title}
+                                href={project.links && project.links[0]?.url}
+                                key={project.title + id}
                                 title={project.title}
-                                description={project.description}
-                                dates={project.dates}
-                                tags={project.technologies}
-                                image={project.image}
-                                video={project.video}
-                                links={project.links}
+                                description={project.excerpt || ""}
+                                dates={project.publishedAt || ""}
+                                tags={project.technologies || []}
+                                image={project.coverImage ? urlFor(project.coverImage).width(1600).url() : undefined}
+                                links={project.links?.map((l: any) => ({ icon: undefined, type: l.label, href: l.url }))}
                             />
                         </BlurFade>
                     ))}
